@@ -1,8 +1,10 @@
 from os import environ
 
+import re
+import json
+
 import asyncio
 import aiohttp
-import json
 
 from shapely.geometry import shape, mapping, Polygon
 from geojson import Feature, FeatureCollection
@@ -113,24 +115,14 @@ async def get_settlement_code(settlement_name: str) -> str:
                     settlement_code = next(
                         match["telepulesKod"]
                         for match in await response.json()
-                        if "telepulesKod" in match
-                        and (
-                            settlement_name
-                            in [
-                                # A budapesti kerületeknél nincs zárójeles utótag
-                                match["telepulesNeve"],
-                                # Minden egyéb településnél van, space-szel elválasztva
-                                match["telepulesNeve"].split()[0],
-                            ]
+                        if re.compile(f"^{settlement_name}(?: .+)?$").match(
+                            match["telepulesNeve"]
                         )
                     )
 
+                    logger.debug(f"{settlement_name} azonosítója: {settlement_code}")
+
                     SETTLEMENT_CODE_CACHE[settlement_name] = settlement_code
-
-                    logger.debug(
-                        f"{settlement_name} településazonosítója: {settlement_code}"
-                    )
-
                     return settlement_code
                 except Exception as e:
                     raise Exception(
