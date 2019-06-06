@@ -110,22 +110,27 @@ async def get_settlement_code(settlement_name: str) -> str:
 
             async with session.get(API_BASE_URL, params=params) as response:
                 try:
-                    results = await response.json()
-                    matches = (result for result in results if "telepulesKod" in result)
-                    relevant_match, *_ = [
-                        match
-                        for match in matches
-                        if match["telepulesNeve"].split()[0] == settlement_name
-                        or match["telepulesNeve"] == settlement_name
-                    ]
+                    settlement_code = next(
+                        match["telepulesKod"]
+                        for match in await response.json()
+                        if "telepulesKod" in match
+                        and (
+                            settlement_name
+                            in [
+                                # A budapesti kerületeknél nincs zárójeles utótag
+                                match["telepulesNeve"],
+                                # Minden egyéb településnél van, space-szel elválasztva
+                                match["telepulesNeve"].split()[0],
+                            ]
+                        )
+                    )
 
-                    settlement_code = SETTLEMENT_CODE_CACHE[
-                        settlement_name
-                    ] = relevant_match["telepulesKod"]
+                    SETTLEMENT_CODE_CACHE[settlement_name] = settlement_code
 
                     logger.debug(
                         f"{settlement_name} településazonosítója: {settlement_code}"
                     )
+
                     return settlement_code
                 except Exception as e:
                     raise Exception(
