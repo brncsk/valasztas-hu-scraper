@@ -8,7 +8,6 @@ import aiohttp
 
 from shapely.geometry import shape, mapping, Polygon
 from geojson import Feature, FeatureCollection
-
 from openpyxl import load_workbook
 
 from typing import AsyncGenerator, Dict, Mapping
@@ -53,22 +52,8 @@ class PollingStationApiParamNames(Enum):
     STATION_NO = "_epszavazokorieredmenyek_WAR_nvinvrportlet_szavkorSorszam"
 
 
-PollingStationApiParams = TypedDict(
-    "PollingStationParams",
-    {
-        PollingStationApiParamNames.SETTLEMENT_CODE.value: str,
-        PollingStationApiParamNames.COUNTY_CODE.value: str,
-        PollingStationApiParamNames.STATION_NO.value: str,
-    },
-)
-
-
 PollingStation = TypedDict(
-    "PollingStation",
-    {
-        "api_params": PollingStationApiParams,
-        "properties": Mapping[WorksheetColumns, int],
-    },
+    "PollingStation", {"api_params": Mapping[str, str], "properties": Mapping[str, int]}
 )
 
 
