@@ -47,9 +47,9 @@ class WorksheetColumns(IntEnum):
 
 
 class PollingStationApiParamNames(Enum):
-    SETTLEMENT_CODE = "_epszavazokorieredmenyek_WAR_nvinvrportlet_telepulesKod"
-    COUNTY_CODE = "_epszavazokorieredmenyek_WAR_nvinvrportlet_megyeKod"
-    STATION_NO = "_epszavazokorieredmenyek_WAR_nvinvrportlet_szavkorSorszam"
+    SETTLEMENT_CODE = "_onkszavazokorieredmenyek_WAR_nvinvrportlet_telepulesKod"
+    COUNTY_CODE = "_onkszavazokorieredmenyek_WAR_nvinvrportlet_megyeKod"
+    STATION_NO = "_onkszavazokorieredmenyek_WAR_nvinvrportlet_szavkorSorszam"
 
 
 PollingStation = TypedDict(
@@ -58,27 +58,27 @@ PollingStation = TypedDict(
 
 
 WORKBOOK_FILE = "EP_2019_szavazóköri_eredmény.xlsx"
-API_BASE_URL = "https://www.valasztas.hu/szavazokorok_ep2019"
+API_BASE_URL = "https://www.valasztas.hu/szavazokorok_onk2019"
 
 API_COMMON_PARAMS = dict(
     p_p_lifecycle="2",
     p_p_state="maximized",
     p_p_mode="view",
     p_p_cacheability="cacheLevelPage",
-    _epszavazokorieredmenyek_WAR_nvinvrportlet_vlId="291",
-    _epszavazokorieredmenyek_WAR_nvinvrportlet_vltId="684",
+    _onkszavazokorieredmenyek_WAR_nvinvrportlet_vlId="294",
+    _onkszavazokorieredmenyek_WAR_nvinvrportlet_vltId="687",
 )
 
 API_GET_MAP_DATA_PARAMS = dict(
     **API_COMMON_PARAMS,
-    p_p_id="epszavazokorieredmenyek_WAR_nvinvrportlet",
+    p_p_id="onkszavazokorieredmenyek_WAR_nvinvrportlet",
     p_p_resource_id="resourceIdGetElectionMapData",
-    _epszavazokorieredmenyek_WAR_nvinvrportlet_tabId="tab2",
+    _onkszavazokorieredmenyek_WAR_nvinvrportlet_tabId="tab2",
 )
 
 API_SEARCH_PARAMS = dict(
     **API_COMMON_PARAMS,
-    p_p_id="epszavazokorok_WAR_nvinvrportlet",
+    p_p_id="onkszavazokorok_WAR_nvinvrportlet",
     p_p_resource_id="resourceIdGetTelepulesOrMegye",
 )
 
@@ -92,7 +92,7 @@ async def get_settlement_code(settlement_name: str) -> str:
         async with aiohttp.ClientSession() as session:
             params = {
                 **API_SEARCH_PARAMS,
-                "_epszavazokorok_WAR_nvinvrportlet_keywords": settlement_name,
+                "_onkszavazokorok_WAR_nvinvrportlet_keywords": settlement_name,
             }
 
             async with session.get(API_BASE_URL, params=params) as response:
@@ -169,12 +169,12 @@ async def fetch_polling_station_geometries() -> AsyncGenerator[Feature, None]:
                 except Exception as exc:
                     geometry = None
                     logger.error(f"Sikertelen a geometria lekérdezése: {station_repr}")
-                    logger.error(
-                        str(
-                            {**API_GET_MAP_DATA_PARAMS, **polling_station["api_params"]}
-                        )
-                    )
-                    logger.error(str(exc))
+                    # logger.error(
+                    #     str(
+                    #         {**API_GET_MAP_DATA_PARAMS, **polling_station["api_params"]}
+                    #     )
+                    # )
+                    # logger.error(str(exc))
                     pass
 
                 yield Feature(
